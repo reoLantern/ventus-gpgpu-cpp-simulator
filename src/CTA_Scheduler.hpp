@@ -1,14 +1,11 @@
 #ifndef CTA_SCHEDULER_H_
 #define CTA_SCHEDULER_H_
 
-#include <iostream>
-#include <fstream>
 #include <memory>
 #include <vector>
 #include "sm/BASE.h"
 #include "context_model.hpp"
 #include "utils.hpp"
-#include "gpgpu_model.hpp"
 
 class BASE;
 

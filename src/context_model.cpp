@@ -1,7 +1,6 @@
 #include "context_model.hpp"
 #include "task.hpp"
 #include "utils/log.h"
-#include <iterator>
 
 kernel_info_t::kernel_info_t(uint32_t kernel_id, const std::string& kernel_name, const std::string& metadata_file,
                              const std::string& data_file, uint64_t pagetable)

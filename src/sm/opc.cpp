@@ -39,7 +39,7 @@ void BASE::OPC_FIFO()
             // std::cout << "OPC_FIFO: poped ins " << popdat.ins << "warp" << popdat.warp_id << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         }
         ev_opc_pop.notify();
-        // 按目前的事件顺序，若发生某ins进入OPC而立刻ready，则会有问题，后续要修改
+        // TODO: 按目前的事件顺序，若发生某ins进入OPC而立刻ready，则会有问题，后续要修改
         if (dispatch_valid)
         {
             if (opc_full && doemit == false) // 相当于上一cycle dispatch_ready

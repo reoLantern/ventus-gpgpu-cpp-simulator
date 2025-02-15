@@ -5,7 +5,6 @@
 #include "CTA_Scheduler.hpp"
 #include <chrono>
 #include <cstring>
-#include <fstream>
 #include <memory>
 #include <string>
 #include "membox_sv39/memory.h"

@@ -357,7 +357,7 @@ void BASE::cycle_UPDATE_SCORE(int warp_id, I_TYPE &tmpins, std::set<SCORE_TYPE>:
         m_hw_warps[warp_id]->wait_bran = 1;
     }
     else if (tmpins.op == OP_TYPE::ENDPRG_ && m_hw_warps[warp_id]->dispatch_warp_valid && (!opc_full | doemit))
-    { // 权宜之计，让endprg后暂停dispatch
+    { // TODO: 权宜之计，让endprg后暂停dispatch
         // std::cout << "SM" << sm_id << " warp " << warp_id << " UPDATE_SCORE detect ENDPRG, suspend to dispatch at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
         m_hw_warps[warp_id]->wait_bran = 1;
     }
