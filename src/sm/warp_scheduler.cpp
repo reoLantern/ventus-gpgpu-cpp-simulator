@@ -84,8 +84,13 @@ void BASE::WARP_SCHEDULER()
                 break;
 
             case OP_TYPE::ENDPRG_:
-                if (m_hw_warps[new_ins_warpid]->is_warp_activated)
+                assert(m_hw_warps[new_ins_warpid]->is_warp_activated);
+                if (m_hw_warps[new_ins_warpid]->is_warp_activated) {
                     m_hw_warps[new_ins_warpid]->is_warp_activated = false;
+                    if(m_hw_warps[new_ins_warpid]->finish_callback){
+                        m_hw_warps[new_ins_warpid]->finish_callback(new_ins_warpid);
+                    }
+                }
                 m_num_warp_activated--;
                 m_hw_warps[new_ins_warpid]->initwarp();
                 reset_endprg_flush_pipe[new_ins_warpid] = true;

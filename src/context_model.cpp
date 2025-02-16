@@ -1,6 +1,8 @@
 #include "context_model.hpp"
+#include "parameters.h"
 #include "task.hpp"
 #include "utils/log.h"
+#include <algorithm>
 
 kernel_info_t::kernel_info_t(uint32_t kernel_id, const std::string& kernel_name, const std::string& metadata_file,
                              const std::string& data_file, uint64_t pagetable)
@@ -8,23 +10,33 @@ kernel_info_t::kernel_info_t(uint32_t kernel_id, const std::string& kernel_name,
     , m_pagetable(pagetable)
     , m_kernel_name(kernel_name)
     , m_data_filename(data_file)
-    , m_is_running(false)
-    , m_is_finished(false)
+    // , m_is_running(false)
+    // , m_is_finished(false)
     , m_finish_callback(nullptr) {
-    m_num_sm_running_this = 0;
+
     initMetaData(metadata_file);
+    assert(get_num_warp_per_cta() <= hw_num_warp);
+
+    m_status = kernel_info_t::KERNEL_STATUS_WAIT;
+    m_num_sm_running_this = 0;
+    m_block_status = std::make_unique<int[]>(get_num_block());
+    m_warp_status = std::make_unique<int[][hw_num_warp]>(get_num_block());
+    std::fill(m_block_status.get(), m_block_status.get() + get_num_block(), BLOCK_STATUS_WAIT);
+    std::fill(*m_warp_status.get(), *m_warp_status.get() + get_num_block() * hw_num_warp, WARP_STATUS_WAIT);
+
     log_info("kernel %s initialized, set grid_dim = %d,%d,%d", kernel_name.c_str(), m_grid_dim.x, m_grid_dim.y,
              m_grid_dim.z);
 }
 
 void kernel_info_t::finish() {
-    assert(is_running());
-    m_is_finished = true;
-    m_is_running = false;
-    if(m_finish_callback) {
+    assert(m_status == KERNEL_STATUS_RUNNING);
+    m_status = KERNEL_STATUS_FINISHED;
+    // m_is_finished = true;
+    // m_is_running = false;
+    if (m_finish_callback) {
         m_finish_callback();
     }
-    log_info("Kernel%d %s finished", get_kid(), get_kname().c_str());
+    log_info("Kernel-%d %s finished", get_kid(), get_kname().c_str());
 }
 
 bool kernel_info_t::no_more_ctas_to_run() const {
@@ -155,7 +167,7 @@ void kernel_info_t::assignMetadata(const std::vector<uint64_t>& metadata, meta_d
 
 // read (testcase.data) hexfile, and setup initial memory
 void kernel_info_t::readTextFile(Memory* mem) {
-    meta_data_t &mtd = m_metadata;
+    meta_data_t& mtd = m_metadata;
     std::ifstream file(m_data_filename);
     if (!file.is_open()) {
         log_fatal("Failed to open file: %s", m_data_filename.c_str());
@@ -193,6 +205,7 @@ void kernel_info_t::readTextFile(Memory* mem) {
 void kernel_info_t::activate(Memory* mem, std::function<void()> finish_callback) {
     readTextFile(mem);
     m_finish_callback = finish_callback;
-    m_is_running = true;
+    // m_is_running = true;
+    m_status = KERNEL_STATUS_RUNNING;
     log_info("Kernel%d %s load init data", m_kernel_id, m_kernel_name.c_str());
 }

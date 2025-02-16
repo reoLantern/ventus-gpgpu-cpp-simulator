@@ -23,7 +23,7 @@
 // #include <format>  // gcc13支持std::format
 
 inline constexpr int hw_num_warp = 8;   // 每个SM支持的最大warp数目
-inline constexpr unsigned MAX_CTA_PER_CORE = 32;
+inline constexpr unsigned MAX_CTA_PER_CORE = hw_num_warp; // 每个core支持的最大cta数目，不应大于hw_num_warp
 inline constexpr int xLen = 32;
 inline constexpr long unsigned int hw_num_thread = 32; // 每个warp支持的最大thread数目
 inline constexpr int ireg_bitsize = 10;
@@ -1631,7 +1631,8 @@ class WARP_BONE
 {
 public:
     int warp_id;
-    sc_event ev_kernel_ret; // 当前warp已经执行完kernel
+    //sc_event ev_kernel_ret; // 当前warp已经执行完kernel
+    std::function<void(int)> finish_callback; // 当前warp执行完毕后回调通知CTA Scheduler
 
     unsigned m_ctaid_in_core; // 与kernel配置有关的、绑定的core内ctaid
 
@@ -1657,6 +1658,7 @@ public:
           simtstk_jump(("simtstk_jump_Warp" + std::to_string(warp_id)).c_str())
     {
         current_mask.write(~sc_bv<hw_num_thread>());
+        finish_callback = nullptr;
     }
 
     void initwarp()

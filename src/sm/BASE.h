@@ -6,8 +6,6 @@
 #include "../parameters.h"
 //#include "../CTA_Scheduler.hpp"
 #include "../context_model.hpp"
-#include "../utils.hpp"
-#include "../gpgpu_model.hpp"
 
 class CTA_Scheduler;
 
@@ -93,7 +91,7 @@ public:
     // writeback
     void WRITE_BACK();
 
-    void set_CTA_Scheduler(CTA_Scheduler *_cta_scheduler_ptr) { m_cta_scheduler = _cta_scheduler_ptr; }
+    //void set_CTA_Scheduler(CTA_Scheduler *_cta_scheduler_ptr) { m_cta_scheduler = _cta_scheduler_ptr; }
 
     // initialize
     void start_of_simulation()
@@ -340,7 +338,7 @@ public:
 
     // CTA Scheduling
     int m_num_active_cta;
-    CTA_Scheduler *m_cta_scheduler;
+    //CTA_Scheduler *m_cta_scheduler;
     void issue_block2core(std::shared_ptr<kernel_info_t> kernel);
     void set_kernel(std::shared_ptr<kernel_info_t> kernel);
     bool can_issue_1block(std::shared_ptr<kernel_info_t> kernel);

@@ -2,7 +2,8 @@
 
 BASE::BASE(sc_core::sc_module_name name, int _sm_id, Memory *mem)
     : sc_module(name), sm_id(_sm_id),
-      m_cta_scheduler(nullptr), m_mem(mem)
+      //m_cta_scheduler(nullptr),
+      m_mem(mem)
 {
     for (int warp_id = 0; warp_id < hw_num_warp; warp_id++)
     {
@@ -227,7 +228,7 @@ void BASE::INSTRUCTION_REG(int warp_id)
                 addrOutofRangeException = 
                     m_mem->readDataVirtual(m_kernel->get_pagetable(), m_hw_warps[warp_id]->pc.read(), 4, &m_hw_warps[warp_id]->fetch_ins);
                 if (addrOutofRangeException)
-                    std::cout << "SM" << sm_id << " warp" << warp_id << "INS_REG error: pc out of range at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
+                    std::cout << "SM" << sm_id << " warp" << warp_id << "INS_REG error: pc(" << std::hex << m_hw_warps[warp_id]->pc.read() << std::dec << ") out of range at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
 
                 // if (sm_id == 0 && warp_id == 0)
                 //     std::cout << "SM" << sm_id << " warp" << warp_id << " ICACHE: read fetch_ins.bit=ins_mem[" << std::hex << m_hw_warps[warp_id]->pc.read() << "]=" << m_hw_warps[warp_id]->fetch_ins.origin32bit << std::dec
@@ -522,10 +523,12 @@ unsigned BASE::max_cta_num(std::shared_ptr<kernel_info_t> kernel)
     unsigned kernel_ldsSize_per_cta = kernel->get_ldsSize_per_cta();
     unsigned result_localmem;
     result_localmem = hw_lds_size / kernel_ldsSize_per_cta - m_num_active_cta;
+    // TODO: Bug? Where is m_num_active_cta initialized?
 
     return result_warp < result_localmem ? result_warp : result_localmem;
 }
 
+// SM receive new block
 void BASE::issue_block2core(std::shared_ptr<kernel_info_t> kernel)
 {
 
@@ -558,6 +561,8 @@ void BASE::issue_block2core(std::shared_ptr<kernel_info_t> kernel)
 
     dim3 ctaid_kernel = kernel->get_next_cta_id();
     unsigned ctaid_kernel_single = kernel->get_next_cta_id_single();
+    assert(kernel->m_block_status[ctaid_kernel_single] == kernel_info_t::BLOCK_STATUS_WAIT);
+    kernel->m_block_status[ctaid_kernel_single] = kernel_info_t::BLOCK_STATUS_RUNNING;
 
     // 遍历并激活每个warp
     for (unsigned widINcta = 0; widINcta < kernel_num_warp_per_cta; widINcta++)
@@ -584,6 +589,14 @@ void BASE::issue_block2core(std::shared_ptr<kernel_info_t> kernel)
         std::cout << std::dec << "SM " << sm_id << " warp " << hw_wid << " is activated at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << " (kernel " << kernel->get_kname() << " CTA " << ctaid_kernel_single << ")" << std::endl;
         m_hw_warps[hw_wid]->pc.write(kernel->get_startaddr());
         //m_hw_warps[hw_wid]->fetch_valid = true;
+        
+        // warp finish callback to CTA Scheduler
+        m_hw_warps[hw_wid]->finish_callback = [kernel, ctaid_kernel_single](int warp_id) {
+            assert(kernel->m_status == kernel_info_t::KERNEL_STATUS_RUNNING);
+            assert(kernel->m_block_status[ctaid_kernel_single] == kernel_info_t::BLOCK_STATUS_RUNNING);
+            assert(kernel->m_warp_status[ctaid_kernel_single][warp_id] == kernel_info_t::WARP_STATUS_RUNNING);
+            kernel->m_warp_status[ctaid_kernel_single][warp_id] = kernel_info_t::WARP_STATUS_FINISHED;
+        };
 
         sc_bv<hw_num_thread> _validmask = 0;
         for (int i = 0; i < kernel_num_thread_per_warp; i++)
@@ -592,6 +605,7 @@ void BASE::issue_block2core(std::shared_ptr<kernel_info_t> kernel)
         }
         m_hw_warps[hw_wid]->current_mask.write(_validmask);
         m_issue_block2warp[hw_wid] = true;
+        kernel->m_warp_status[ctaid_kernel_single][hw_wid] = kernel_info_t::WARP_STATUS_RUNNING;
     }
     m_num_warp_activated += kernel_num_warp_per_cta;
     m_current_kernel_running.write(true);

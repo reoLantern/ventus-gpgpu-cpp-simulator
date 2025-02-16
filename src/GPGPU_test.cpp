@@ -33,8 +33,7 @@ int sc_main(int argc, char *argv[])
     BASE_sti BASE_sti_impl("BASE_STI");
 
     std::cout << "----------Initializing CTAs----------\n";
-    CTA_Scheduler cta_impl("CTA_Scheduler");
-    cta_impl.sm_group = BASE_impl;
+    CTA_Scheduler cta_impl("CTA_Scheduler", BASE_impl);
     // cta_impl.CTA_INIT();
     
     Host host_impl("Host_GPGPU_Driver", &mem, &cta_impl);
@@ -70,10 +69,10 @@ int sc_main(int argc, char *argv[])
     log_debug("Finish reading runtime args");
 
 
-    for (int i = 0; i < NUM_SM; i++)
-    {
-        BASE_impl[i]->set_CTA_Scheduler(&cta_impl);
-    }
+//    for (int i = 0; i < NUM_SM; i++)
+//    {
+//        BASE_impl[i]->set_CTA_Scheduler(&cta_impl);
+//    }
 
     for (int i = 0; i < NUM_SM; i++)
     {
