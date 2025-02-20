@@ -131,8 +131,8 @@ void BASE::WRITE_BACK()
         }
         else if (lsufifo_empty == false)
         {
-            // if (sm_id == 0)
-            //     std::cout << "SM" << sm_id << " WB judge poplsu, at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            if (sm_id == 0)
+                std::cout << "SM" << sm_id << " WB judge poplsu, at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             execpop_lsu = true;
             if (lsutop_dat.ins.ddd.wxd)
             {

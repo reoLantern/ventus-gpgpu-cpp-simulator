@@ -136,7 +136,7 @@ void BASE::CSR_CALC()
 #endif
                 break;
             case VSETVLI_:
-                csrtmp2.data = m_kernel->get_num_thread_per_warp();
+                csrtmp2.data = m_hw_warps[csrtmp1.warp_id]->num_thread;
                 break;
             case SETRPC_:
                 m_hw_warps[csrtmp1.warp_id]->CSR_reg[0x80c] = csrtmp1.csrSdata1 + csrtmp1.csrSdata2;

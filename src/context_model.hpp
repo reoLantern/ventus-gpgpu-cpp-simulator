@@ -74,8 +74,11 @@ public:
     enum { KERNEL_STATUS_WAIT, KERNEL_STATUS_RUNNING, KERNEL_STATUS_FINISHED } m_status;
     enum { BLOCK_STATUS_WAIT, BLOCK_STATUS_RUNNING, BLOCK_STATUS_FINISHED };
     enum { WARP_STATUS_WAIT, WARP_STATUS_RUNNING, WARP_STATUS_FINISHED };
-    std::unique_ptr<int[]> m_block_status; // status of each block
-    std::unique_ptr<int[][hw_num_warp]> m_warp_status; // status of each warp
+    std::vector<int> m_block_status; // status of each block
+    std::vector<std::array<int,hw_num_warp>> m_warp_status; // status of each warp
+
+    // Which SM are blocks running on
+    std::vector<int> m_block_sm_id;
 
     // Load initial data and get ready to run
     void activate(Memory* mem, std::function<void()> finish_callback);

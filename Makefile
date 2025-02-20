@@ -80,13 +80,14 @@ RUNFLAGS = --task name=BFS \
 	   --kernel taskid=1,name=FAN2_1,metafile=testcase/adv_gaussian/Fan2_1.metadata,datafile=testcase/adv_gaussian/Fan2_1.data \
 	   --kernel taskid=1,name=FAN1_2,metafile=testcase/adv_gaussian/Fan1_2.metadata,datafile=testcase/adv_gaussian/Fan1_2.data \
 	   --kernel taskid=1,name=FAN2_2,metafile=testcase/adv_gaussian/Fan2_2.metadata,datafile=testcase/adv_gaussian/Fan2_2.data \
-	   --kernel name=vecadd,metafile=testcase/adv_vecadd/vecadd4x4.metadata,datafile=testcase/adv_vecadd/vecadd4x4.data \
-	   --numcycle 100000
+	   --kernel name=vecadd,metafile=testcase/adv_vecadd/vecadd_1b4w4t.metadata,datafile=testcase/adv_vecadd/vecadd_1b4w4t.data \
+	   --numcycle 150000
 ##RUNFLAGS = --task name=TNAME \
 ##	   --kernel taskid=0,name=vecadd,metafile=testcase/adv_vecadd/vecadd4x4.metadata,datafile=testcase/adv_vecadd/vecadd4x4.data \
 ##	   --kernel taskid=0,name=matadd,metafile=testcase/multiblock/matadd/matadd.metadata,datafile=testcase/multiblock/matadd/matadd.data \
 ##	   --numcycle 500000
-#RUNFLAGS = --numkernel 2 vecadd adv_vecadd/vecadd4x4.metadata adv_vecadd/vecadd4x4.data matadd multiblock/matadd/matadd.metadata multiblock/matadd/matadd.data --numcycle 500000
+#RUNFLAGS = --kernel name=vecadd,metafile=testcase/adv_vecadd/vecadd_1b4w4t.metadata,datafile=testcase/adv_vecadd/vecadd_1b4w4t.data \
+#	   --numcycle 100000
 #RUNFLAGS = --numkernel 2 matadd multiblock/matadd/matadd.metadata multiblock/matadd/matadd.data vecadd adv_vecadd/vecadd4x4.metadata adv_vecadd/vecadd4x4.data --numcycle 500000
 RUNFLAGS_tensor484 = --numkernel 1 tensor tensor/wmma484fp32/wmma484fp32.metadata tensor/wmma484fp32/wmma484fp32.data --numcycle 2000
 RUNFLAGS_tensor242 = --numkernel 1 tensor tensor/wmma424fp32/wmma424fp32.metadata tensor/wmma424fp32/wmma424fp32.data --numcycle 2000

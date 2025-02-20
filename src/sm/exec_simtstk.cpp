@@ -45,7 +45,7 @@ void BASE::SIMT_STACK(int warp_id)
         {
             m_hw_warps[warp_id]->vbran_sig = true;
             readins = vbranch_ins.read();
-            if (emito_simtstk)
+            if (emito_simtstk && emitins_warpid == warp_id)
                 std::cout << "SM" << sm_id << " warp " << warp_id << " SIMT-STACK error: receive join & beq at the same time at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
 
 #ifdef SPIKE_OUTPUT

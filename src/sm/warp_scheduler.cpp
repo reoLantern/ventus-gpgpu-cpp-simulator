@@ -87,8 +87,11 @@ void BASE::WARP_SCHEDULER()
                 assert(m_hw_warps[new_ins_warpid]->is_warp_activated);
                 if (m_hw_warps[new_ins_warpid]->is_warp_activated) {
                     m_hw_warps[new_ins_warpid]->is_warp_activated = false;
-                    if(m_hw_warps[new_ins_warpid]->finish_callback){
-                        m_hw_warps[new_ins_warpid]->finish_callback(new_ins_warpid);
+                    if(m_warp_finish_callback){
+                        m_warp_finish_callback(sm_id, m_hw_warps[new_ins_warpid]->blk_slot_idx,
+                                               m_hw_warps[new_ins_warpid]->warp_idx_in_blk);
+                        m_hw_warps[new_ins_warpid]->will_warp_activate = false;
+                        // m_hw_warps[new_ins_warpid]->finish_callback(sm_id, new_ins_warpid);
                     }
                 }
                 m_num_warp_activated--;

@@ -19,10 +19,13 @@ kernel_info_t::kernel_info_t(uint32_t kernel_id, const std::string& kernel_name,
 
     m_status = kernel_info_t::KERNEL_STATUS_WAIT;
     m_num_sm_running_this = 0;
-    m_block_status = std::make_unique<int[]>(get_num_block());
-    m_warp_status = std::make_unique<int[][hw_num_warp]>(get_num_block());
-    std::fill(m_block_status.get(), m_block_status.get() + get_num_block(), BLOCK_STATUS_WAIT);
-    std::fill(*m_warp_status.get(), *m_warp_status.get() + get_num_block() * hw_num_warp, WARP_STATUS_WAIT);
+    m_block_status.resize(get_num_block());
+    m_warp_status.resize(get_num_block());
+    for(int i = 0; i < get_num_block(); i++) {
+        m_block_status[i] = BLOCK_STATUS_WAIT;
+        m_warp_status[i].fill(WARP_STATUS_WAIT);
+    }
+    m_block_sm_id.resize(get_num_block());
 
     log_info("kernel %s initialized, set grid_dim = %d,%d,%d", kernel_name.c_str(), m_grid_dim.x, m_grid_dim.y,
              m_grid_dim.z);
@@ -36,7 +39,7 @@ void kernel_info_t::finish() {
     if (m_finish_callback) {
         m_finish_callback();
     }
-    log_info("Kernel-%d %s finished", get_kid(), get_kname().c_str());
+    log_info("Kernel %d %s finished", get_kid(), get_kname().c_str());
 }
 
 bool kernel_info_t::no_more_ctas_to_run() const {

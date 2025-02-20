@@ -34,6 +34,12 @@ int sc_main(int argc, char *argv[])
 
     std::cout << "----------Initializing CTAs----------\n";
     CTA_Scheduler cta_impl("CTA_Scheduler", BASE_impl);
+    for(int i = 0; i < NUM_SM; i++)
+    {
+        BASE_impl[i]->m_warp_finish_callback = [&cta_impl](int sm_id, int blk_slot_idx, int warp_idx_in_blk) {
+            cta_impl.warp_finished(sm_id, blk_slot_idx, warp_idx_in_blk);
+        };
+    }
     // cta_impl.CTA_INIT();
     
     Host host_impl("Host_GPGPU_Driver", &mem, &cta_impl);
@@ -213,7 +219,7 @@ int sc_main(int argc, char *argv[])
     auto start = std::chrono::high_resolution_clock::now();
     sc_core::sc_start(std::stoi(numcycle), SC_NS);
 
-    std::cout << "----------Simulation end------------\n";
+    std::cout << "----------Simulation end------------ @ " << sc_core::sc_time_stamp() << std::endl;
 
     for (auto tf_ : tf)
         sc_close_vcd_trace_file(tf_);

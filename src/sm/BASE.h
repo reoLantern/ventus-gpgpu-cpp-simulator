@@ -15,7 +15,11 @@ public:
     sc_in_clk clk{"clk"};
     sc_in<bool> rst_n{"rst_n"};
 
-    Memory *m_mem;
+    // Memory Access: global & local(shared)
+    Memory *m_mem;  // global memory handle
+    std::array<uint8_t, hw_lds_size> m_local_mem;     // LDS of this SM
+    bool mem_read_word(uint32_t *data, uint32_t vaddr, const I_TYPE &ins, uint64_t pagetable) const;
+    bool mem_write_word(uint32_t data, uint32_t vaddr, const I_TYPE &ins, uint64_t pagetable) ;
 
     void debug_sti();
     void debug_display();
@@ -113,6 +117,7 @@ public:
     SafeArray<WARP_BONE *, hw_num_warp> m_hw_warps;
     // std::array<WARP_BONE *, hw_num_warp> m_hw_warps;
     // std::unordered_map<int, WARP_BONE*> m_hw_warps;
+
 
     std::array<std::array<sc_core::sc_process_handle *, hw_num_warp>, 9> warp_threads_group;
     // std::array<sc_core::sc_process_handle *, hw_num_warp> threads_PROGRAM_COUNTER;
@@ -340,6 +345,8 @@ public:
     int m_num_active_cta;
     //CTA_Scheduler *m_cta_scheduler;
     void issue_block2core(std::shared_ptr<kernel_info_t> kernel);
+    void receive_warp(uint32_t block_idx, uint32_t warp_idx, std::shared_ptr<kernel_info_t> kernel, uint32_t block_slot, uint32_t lds_baseaddr);
+    std::function<void(int sm_id, int blk_slot_idx, int warp_idx_in_blk)> m_warp_finish_callback; // warp执行完毕后回调通知CTA Scheduler
     void set_kernel(std::shared_ptr<kernel_info_t> kernel);
     bool can_issue_1block(std::shared_ptr<kernel_info_t> kernel);
     std::shared_ptr<kernel_info_t> m_kernel;
