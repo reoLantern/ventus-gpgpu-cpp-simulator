@@ -83,6 +83,7 @@ void BASE::MUL_CALC()
         // std::cout << "mul_eqa.default_event triggered at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         multmp1 = mul_dq.front();
         mul_dq.pop();
+        auto& hwarp = m_hw_warps[multmp1.warp_id];
         if (multmp1.ins.ddd.wxd | multmp1.ins.ddd.wvd)
         {
             multmp2.ins = multmp1.ins;
@@ -92,7 +93,7 @@ void BASE::MUL_CALC()
 
             case DecodeParams::alu_fn_t::FN_MUL:
                 // VMUL.VV, VMUL.VX
-                for (int i = 0; i < m_hw_warps[multmp1.warp_id]->CSR_reg[0x802]; i++)
+                for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                 {
                     if (multmp2.ins.mask[i] == 1)
                         multmp2.rdv1_data[i] = multmp1.rsv1_data[i] * multmp1.rsv2_data[i];
@@ -102,7 +103,7 @@ void BASE::MUL_CALC()
             case DecodeParams::alu_fn_t::FN_MADD:
                 // VMADD
                 // std::cout << "EXEC_MUL: FN_MADD,{thread,s1,s2,s3}: " << std::hex;
-                for (int i = 0; i < m_hw_warps[multmp1.warp_id]->CSR_reg[0x802]; i++)
+                for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                 {
                     if (multmp2.ins.mask[i] == 1)
                     {

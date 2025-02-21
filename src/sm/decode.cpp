@@ -6,21 +6,22 @@ void BASE::DECODE(int warp_id)
     sc_bv<32> scinsbit;
     bool WILLregext = false;
     int ext1, ext2, ext3, extd, extimm;
+    auto& hwarp = m_hw_warps[warp_id];
     while (true)
     {
         // std::cout << "SM" << sm_id << " warp" << warp_id << " DECODE: finish at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
-        wait(m_hw_warps[warp_id]->ev_decode);
+        wait(hwarp->ev_decode);
             
-        if (m_hw_warps[warp_id]->jump == 1 ||
-            m_hw_warps[warp_id]->simtstk_jump == 1||
-            m_hw_warps[warp_id]->endprg_flush_pipe)
+        if (hwarp->jump == 1 ||
+            hwarp->simtstk_jump == 1||
+            hwarp->endprg_flush_pipe)
         {
-            m_hw_warps[warp_id]->fetch_valid2 = false;
+            hwarp->fetch_valid2 = false;
             WILLregext = false;
         }
         else
         { // std::cout << "SM" << sm_id << " warp" << warp_id << " DECODE: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
-            tmpins = I_TYPE(m_hw_warps[warp_id]->fetch_ins, m_hw_warps[warp_id]->pc.read());
+            tmpins = I_TYPE(hwarp->fetch_ins, hwarp->pc.read());
             // if (sm_id == 0 && warp_id == 0)
             //     std::cout << "SM" << sm_id << " warp" << warp_id << " DECODE ins.bit=" << std::hex << tmpins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
 
@@ -51,7 +52,7 @@ void BASE::DECODE(int warp_id)
 
             if (tmpins.op == (int)REGEXT_)
             {
-                m_hw_warps[warp_id]->fetch_valid2 = false;
+                hwarp->fetch_valid2 = false;
                 WILLregext = true;
 
                 extimm = 0;
@@ -66,7 +67,7 @@ void BASE::DECODE(int warp_id)
             }
             else if (tmpins.op == (int)REGEXTI_)
             {
-                m_hw_warps[warp_id]->fetch_valid2 = false;
+                hwarp->fetch_valid2 = false;
                 WILLregext = true;
 
                 extimm = extractBits32(tmpins.origin32bit, 31, 26);
@@ -81,7 +82,7 @@ void BASE::DECODE(int warp_id)
             }
             else
             {
-                m_hw_warps[warp_id]->fetch_valid2 = m_hw_warps[warp_id]->fetch_valid12;
+                hwarp->fetch_valid2 = hwarp->fetch_valid12;
                 if (tmpins.ddd.tc)
                     tmpins.ddd.sel_execunit = DecodeParams::TC;
                 else if (tmpins.ddd.sfu)
@@ -166,7 +167,7 @@ void BASE::DECODE(int warp_id)
                     break;
                 }
 
-                m_hw_warps[warp_id]->decode_ins = tmpins;
+                hwarp->decode_ins = tmpins;
             }
         }
     }

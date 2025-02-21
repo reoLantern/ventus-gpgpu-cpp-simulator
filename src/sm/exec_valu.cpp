@@ -117,6 +117,7 @@ void BASE::VALU_CALC()
         // std::cout << "valu_eqa.default_event triggered at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
         valutmp1 = valu_dq.front();
         valu_dq.pop();
+        auto& hwarp = m_hw_warps[valutmp1.warp_id];
         if (valutmp1.ins.ddd.wxd | valutmp1.ins.ddd.wvd)
         {
             valutmp2.ins = valutmp1.ins;
@@ -126,7 +127,7 @@ void BASE::VALU_CALC()
 
             case DecodeParams::alu_fn_t::FN_ADD:
                 // VADD12.VI, VADD.VI, VADD.VV, VADD.VX
-                for (int i = 0; i < m_hw_warps[valutmp1.warp_id]->CSR_reg[0x802]; i++)
+                for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                 {
                     if (valutmp2.ins.mask[i] == 1)
                         valutmp2.rdv1_data[i] = valutmp1.rsv1_data[i] + valutmp1.rsv2_data[i];
@@ -135,7 +136,7 @@ void BASE::VALU_CALC()
 
             case DecodeParams::alu_fn_t::FN_AND:
                 // VAND.VI, VAND.VV, VAND.VX
-                for (int i = 0; i < m_hw_warps[valutmp1.warp_id]->CSR_reg[0x802]; i++)
+                for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                 {
                     if (valutmp2.ins.mask[i] == 1)
                         valutmp2.rdv1_data[i] = valutmp1.rsv1_data[i] & valutmp1.rsv2_data[i];
@@ -145,13 +146,13 @@ void BASE::VALU_CALC()
             case DecodeParams::alu_fn_t::FN_SL:
                 // VSLL.VI, VSLL.VV, VSLL.VX
                 if (!valutmp1.ins.ddd.reverse)
-                    for (int i = 0; i < m_hw_warps[valutmp1.warp_id]->CSR_reg[0x802]; i++)
+                    for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                     {
                         if (valutmp2.ins.mask[i] == 1)
                             valutmp2.rdv1_data[i] = valutmp1.rsv1_data[i] << valutmp1.rsv2_data[i];
                     }
                 else
-                    for (int i = 0; i < m_hw_warps[valutmp1.warp_id]->CSR_reg[0x802]; i++)
+                    for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                     {
                         if (valutmp2.ins.mask[i] == 1)
                             valutmp2.rdv1_data[i] = valutmp1.rsv2_data[i] << valutmp1.rsv1_data[i];
@@ -161,13 +162,13 @@ void BASE::VALU_CALC()
             case DecodeParams::alu_fn_t::FN_SUB:
                 // VSUB12.VI, VSUB.VV, VSUB.VX
                 if (!valutmp1.ins.ddd.reverse)
-                    for (int i = 0; i < m_hw_warps[valutmp1.warp_id]->CSR_reg[0x802]; i++)
+                    for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                     {
                         if (valutmp2.ins.mask[i] == 1)
                             valutmp2.rdv1_data[i] = valutmp1.rsv1_data[i] - valutmp1.rsv2_data[i];
                     }
                 else
-                    for (int i = 0; i < m_hw_warps[valutmp1.warp_id]->CSR_reg[0x802]; i++)
+                    for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                     {
                         if (valutmp2.ins.mask[i] == 1)
                             valutmp2.rdv1_data[i] = valutmp1.rsv2_data[i] - valutmp1.rsv1_data[i];
@@ -175,7 +176,7 @@ void BASE::VALU_CALC()
                 break;
             case DecodeParams::alu_fn_t::FN_VID:
                 // VID.V
-                for (int i = 0; i < m_hw_warps[valutmp1.warp_id]->CSR_reg[0x802]; i++)
+                for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                     valutmp2.rdv1_data[i] = i;
                 break;
 
@@ -184,7 +185,7 @@ void BASE::VALU_CALC()
                 // 由于指令编码错误 现在当成vmv.v.x
                 // std::cout << "VALU_CALC switch to FN_A2ZERO, RSDATA=" << valutmp1.rsv1_data[0]
                 //      << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
-                for (int i = 0; i < m_hw_warps[valutmp1.warp_id]->CSR_reg[0x802]; i++)
+                for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                     valutmp2.rdv1_data[i] = valutmp1.rsv1_data[0];
                 break;
 
@@ -201,7 +202,7 @@ void BASE::VALU_CALC()
             switch (valutmp1.ins.ddd.alu_fn)
             { // mask低位对应有效线程数；else分支为跳转
             case DecodeParams::alu_fn_t::FN_SEQ:
-                for (int i = 0; i < m_hw_warps[valutmp1.warp_id]->CSR_reg[0x802]; i++)
+                for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                 {
                     if (valutmp1.ins.mask[i] == 0)
                     {
@@ -228,7 +229,7 @@ void BASE::VALU_CALC()
                 break;
 
             case DecodeParams::alu_fn_t::FN_SNE:
-                for (int i = 0; i < m_hw_warps[valutmp1.warp_id]->CSR_reg[0x802]; i++)
+                for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                 {
                     if (valutmp1.ins.mask[i] == 0)
                     {
@@ -255,7 +256,7 @@ void BASE::VALU_CALC()
                 break;
 
             case DecodeParams::alu_fn_t::FN_SGE:
-                for (int i = 0; i < m_hw_warps[valutmp1.warp_id]->CSR_reg[0x802]; i++)
+                for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                 {
                     if (valutmp1.ins.mask[i] == 0)
                     {
@@ -282,7 +283,7 @@ void BASE::VALU_CALC()
                 break;
 
             case DecodeParams::alu_fn_t::FN_SLT:
-                for (int i = 0; i < m_hw_warps[valutmp1.warp_id]->CSR_reg[0x802]; i++)
+                for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                 {
                     if (valutmp1.ins.mask[i] == 0)
                     {
@@ -309,7 +310,7 @@ void BASE::VALU_CALC()
                 break;
 
             case DecodeParams::alu_fn_t::FN_SGEU:
-                for (int i = 0; i < m_hw_warps[valutmp1.warp_id]->CSR_reg[0x802]; i++)
+                for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                 {
                     if (valutmp1.ins.mask[i] == 0)
                     {
@@ -336,7 +337,7 @@ void BASE::VALU_CALC()
                 break;
 
             case DecodeParams::alu_fn_t::FN_SLTU:
-                for (int i = 0; i < m_hw_warps[valutmp1.warp_id]->CSR_reg[0x802]; i++)
+                for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                 {
                     if (valutmp1.ins.mask[i] == 0)
                     {

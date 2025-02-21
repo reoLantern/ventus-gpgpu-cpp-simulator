@@ -100,6 +100,7 @@ void BASE::SALU_CALC()
         // std::cout << "salu_dq.front's ins is " << salutmp1.ins << ", data is " << salutmp1.rss1_data << "," << salutmp1.rss2_data << std::endl;
         salu_dq.pop();
         // std::cout << "salu_dq has poped, now its elem_num is " << salu_dq.size() << " at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << std::endl;
+        auto& hwarp = m_hw_warps[salutmp1.warp_id];
         if (salutmp1.ins.ddd.wxd)
         {
             salutmp2.ins = salutmp1.ins;
@@ -114,9 +115,9 @@ void BASE::SALU_CALC()
 #ifdef SPIKE_OUTPUT
                     std::cout << "SM" << sm_id << " warp " << salutmp1.warp_id << " 0x" << std::hex << salutmp1.ins.currentpc << " " << salutmp1.ins << " jump=true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
 #endif
-                    m_hw_warps[salutmp1.warp_id]->branch_sig = true;
-                    m_hw_warps[salutmp1.warp_id]->jump = 1;
-                    m_hw_warps[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
+                    hwarp->branch_sig = true;
+                    hwarp->jump = 1;
+                    hwarp->jump_addr = salutmp1.rss3_data;
                 }
                 else if (salutmp1.ins.ddd.branch == DecodeParams::branch_t::B_R) // jalr
                 {
@@ -124,17 +125,17 @@ void BASE::SALU_CALC()
 #ifdef SPIKE_OUTPUT
                     std::cout << "SM" << sm_id << " warp " << salutmp1.warp_id << " 0x" << std::hex << salutmp1.ins.currentpc << " " << salutmp1.ins << " jump=true, jumpTO 0x" << std::hex << jump_addr_tmp << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
 #endif
-                    m_hw_warps[salutmp1.warp_id]->branch_sig = true;
-                    m_hw_warps[salutmp1.warp_id]->jump = 1;
-                    m_hw_warps[salutmp1.warp_id]->jump_addr = jump_addr_tmp;
+                    hwarp->branch_sig = true;
+                    hwarp->jump = 1;
+                    hwarp->jump_addr = jump_addr_tmp;
                 }
                 else{
 #ifdef SPIKE_OUTPUT
                     if (salutmp1.warp_id == 2 && sm_id == 0){
                         std::cout << "SM" << sm_id << " warp " << salutmp1.warp_id << " 0x" << std::hex << salutmp1.ins.currentpc << " " << salutmp1.ins << ", rs1=" << std::hex << salutmp1.rss1_data << ", rs2=" << salutmp1.rss2_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
                         std::cout << "↑currently, rs1_addr=" << salutmp1.ins.s1 << ",rs2_addr=" << salutmp1.ins.s2 << ",rd_addr=" << salutmp1.ins.d
-                            << ", s_regfile[rs1_addr]=" << m_hw_warps[salutmp1.warp_id]->s_regfile[salutmp1.ins.s1]
-                            << ", s_regfile[rs2_addr]=" << m_hw_warps[salutmp1.warp_id]->s_regfile[salutmp1.ins.s2] << std::endl;
+                            << ", s_regfile[rs1_addr]=" << hwarp->s_regfile[salutmp1.ins.s1]
+                            << ", s_regfile[rs2_addr]=" << hwarp->s_regfile[salutmp1.ins.s2] << std::endl;
                     }
 #endif
                 }
@@ -262,11 +263,11 @@ void BASE::SALU_CALC()
             {
             // case BEQ_:
             case DecodeParams::alu_fn_t::FN_SEQ:
-                m_hw_warps[salutmp1.warp_id]->branch_sig = true;
+                hwarp->branch_sig = true;
                 if (salutmp1.rss1_data == salutmp1.rss2_data)
                 {
-                    m_hw_warps[salutmp1.warp_id]->jump = 1;
-                    m_hw_warps[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
+                    hwarp->jump = 1;
+                    hwarp->jump_addr = salutmp1.rss3_data;
 #ifdef SPIKE_OUTPUT
                     std::cout << "true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
 #endif
@@ -281,11 +282,11 @@ void BASE::SALU_CALC()
 
             // case BGE_:
             case DecodeParams::alu_fn_t::FN_SGE:
-                m_hw_warps[salutmp1.warp_id]->branch_sig = true;
+                hwarp->branch_sig = true;
                 if (salutmp1.rss1_data >= salutmp1.rss2_data)
                 {
-                    m_hw_warps[salutmp1.warp_id]->jump = 1;
-                    m_hw_warps[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
+                    hwarp->jump = 1;
+                    hwarp->jump_addr = salutmp1.rss3_data;
 #ifdef SPIKE_OUTPUT
                     std::cout << "true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
 #endif
@@ -299,11 +300,11 @@ void BASE::SALU_CALC()
                 break;
             // case BGEU_:
             case DecodeParams::alu_fn_t::FN_SGEU:
-                m_hw_warps[salutmp1.warp_id]->branch_sig = true;
+                hwarp->branch_sig = true;
                 if (static_cast<unsigned int>(salutmp1.rss1_data) >= static_cast<unsigned int>(salutmp1.rss2_data))
                 {
-                    m_hw_warps[salutmp1.warp_id]->jump = 1;
-                    m_hw_warps[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
+                    hwarp->jump = 1;
+                    hwarp->jump_addr = salutmp1.rss3_data;
 #ifdef SPIKE_OUTPUT
                     std::cout << "true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
 #endif
@@ -317,11 +318,11 @@ void BASE::SALU_CALC()
                 break;
             // case BLT_:
             case DecodeParams::alu_fn_t::FN_SLT:
-                m_hw_warps[salutmp1.warp_id]->branch_sig = true;
+                hwarp->branch_sig = true;
                 if (salutmp1.rss1_data < salutmp1.rss2_data)
                 {
-                    m_hw_warps[salutmp1.warp_id]->jump = 1;
-                    m_hw_warps[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
+                    hwarp->jump = 1;
+                    hwarp->jump_addr = salutmp1.rss3_data;
 #ifdef SPIKE_OUTPUT
                     std::cout << "true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
 #endif
@@ -335,11 +336,11 @@ void BASE::SALU_CALC()
                 break;
             // case BLTU_:
             case DecodeParams::alu_fn_t::FN_SLTU:
-                m_hw_warps[salutmp1.warp_id]->branch_sig = true;
+                hwarp->branch_sig = true;
                 if (static_cast<unsigned int>(salutmp1.rss1_data) < static_cast<unsigned int>(salutmp1.rss2_data))
                 {
-                    m_hw_warps[salutmp1.warp_id]->jump = 1;
-                    m_hw_warps[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
+                    hwarp->jump = 1;
+                    hwarp->jump_addr = salutmp1.rss3_data;
 #ifdef SPIKE_OUTPUT
                     std::cout << "true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
 #endif
@@ -354,11 +355,11 @@ void BASE::SALU_CALC()
 
             // case BNE_:
             case DecodeParams::alu_fn_t::FN_SNE:
-                m_hw_warps[salutmp1.warp_id]->branch_sig = true;
+                hwarp->branch_sig = true;
                 if (salutmp1.rss1_data != salutmp1.rss2_data)
                 {
-                    m_hw_warps[salutmp1.warp_id]->jump = 1;
-                    m_hw_warps[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
+                    hwarp->jump = 1;
+                    hwarp->jump_addr = salutmp1.rss3_data;
 #ifdef SPIKE_OUTPUT
                     std::cout << "true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << std::endl;
 #endif

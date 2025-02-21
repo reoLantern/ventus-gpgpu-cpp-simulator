@@ -82,6 +82,7 @@ void BASE::SFU_CALC()
         // std::cout << "sfu_eqa.default_event triggered at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         sfutmp1 = sfu_dq.front();
         sfu_dq.pop();
+        auto& hwarp = m_hw_warps[sfutmp1.warp_id];
         if (sfutmp1.ins.ddd.wxd | sfutmp1.ins.ddd.wvd)
         {
             sfutmp2.ins = sfutmp1.ins;
@@ -97,7 +98,7 @@ void BASE::SFU_CALC()
                     {
                         if (sfutmp1.ins.ddd.sel_alu1 == DecodeParams::A1_RS1)
                         { // VREMU.VX
-                            for (int i = 0; i < m_hw_warps[sfutmp1.warp_id]->CSR_reg[0x802]; i++)
+                            for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                             {
                                 if (sfutmp2.ins.mask[i] == 1)
                                     sfutmp2.rdv1_data[i] = (unsigned)sfutmp1.rsv2_data[i] % sfutmp1.rsv1_data[0];
@@ -105,7 +106,7 @@ void BASE::SFU_CALC()
                         }
                         else
                         {
-                            for (int i = 0; i < m_hw_warps[sfutmp1.warp_id]->CSR_reg[0x802]; i++)
+                            for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                             {
                                 if (sfutmp2.ins.mask[i] == 1)
                                 {
@@ -120,7 +121,7 @@ void BASE::SFU_CALC()
                     }
                     else
                     {
-                        for (int i = 0; i < m_hw_warps[sfutmp1.warp_id]->CSR_reg[0x802]; i++)
+                        for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                         {
                             if (sfutmp2.ins.mask[i] == 1)
                                 sfutmp2.rdv1_data[i] = (unsigned)sfutmp1.rsv1_data[i] % sfutmp1.rsv2_data[i];
@@ -136,7 +137,7 @@ void BASE::SFU_CALC()
                 if (sfutmp1.ins.ddd.isvec)
                 {
                     if (sfutmp1.ins.ddd.reverse)
-                        for (int i = 0; i < m_hw_warps[sfutmp1.warp_id]->CSR_reg[0x802]; i++)
+                        for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                         {
                             if (sfutmp2.ins.mask[i] == 1)
                             {
@@ -148,7 +149,7 @@ void BASE::SFU_CALC()
                             }
                         }
                     else
-                        for (int i = 0; i < m_hw_warps[sfutmp1.warp_id]->CSR_reg[0x802]; i++)
+                        for (int i = 0; i < hwarp->CSR_reg[0x802]; i++)
                         {
                             if (sfutmp2.ins.mask[i] == 1)
                                 sfutmp2.rdv1_data[i] = (unsigned)sfutmp1.rsv1_data[i] / (unsigned)sfutmp1.rsv2_data[i];

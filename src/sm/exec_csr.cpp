@@ -73,6 +73,7 @@ void BASE::CSR_CALC()
         }
         csrtmp1 = csr_dq.front();
         csr_dq.pop();
+        auto& hwarp = m_hw_warps[csrtmp1.warp_id];
         if (csrtmp1.ins.ddd.wxd | csrtmp1.ins.ddd.wvd)
         {
             csrtmp2.ins = csrtmp1.ins;
@@ -81,70 +82,70 @@ void BASE::CSR_CALC()
             switch (csrtmp1.ins.op)
             {
             case CSRRW_:
-                t = m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr];
+                t = hwarp->CSR_reg[csr_addr];
                 csrtmp2.data = t;
-                m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr] = csrtmp1.csrSdata1;
+                hwarp->CSR_reg[csr_addr] = csrtmp1.csrSdata1;
 #ifdef SPIKE_OUTPUT
-                std::cout << "SM" << sm_id << " warp " << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr]
+                std::cout << "SM" << sm_id << " warp " << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << hwarp->CSR_reg[csr_addr]
                           << " by ins pc=0x" << csrtmp1.ins.currentpc << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 #endif
                 break;
             case CSRRS_:
-                t = m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr];
+                t = hwarp->CSR_reg[csr_addr];
                 csrtmp2.data = t;
-                m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr] = t | csrtmp1.csrSdata1;
+                hwarp->CSR_reg[csr_addr] = t | csrtmp1.csrSdata1;
 // std::cout << "CSRRS, t=" << std::hex << t << ", csrSdata1=" << csrtmp1.csrSdata1 << std::dec << ", ins.s1=" << csrtmp1.ins.s1 << "\n";
 #ifdef SPIKE_OUTPUT
-                std::cout << "SM" << sm_id << " warp " << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr]
+                std::cout << "SM" << sm_id << " warp " << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << hwarp->CSR_reg[csr_addr]
                           << " by ins pc=0x" << csrtmp1.ins.currentpc << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 #endif
                 break;
             case CSRRC_:
-                t = m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr];
+                t = hwarp->CSR_reg[csr_addr];
                 csrtmp2.data = t;
-                m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr] = t & ~csrtmp1.csrSdata1;
+                hwarp->CSR_reg[csr_addr] = t & ~csrtmp1.csrSdata1;
 #ifdef SPIKE_OUTPUT
-                std::cout << "SM" << sm_id << " warp " << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr]
+                std::cout << "SM" << sm_id << " warp " << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << hwarp->CSR_reg[csr_addr]
                           << " by ins pc=0x" << csrtmp1.ins.currentpc << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 
 #endif
                 break;
             case CSRRWI_:
-                csrtmp2.data = m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr];
-                m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr] = csrtmp1.ins.s1;
+                csrtmp2.data = hwarp->CSR_reg[csr_addr];
+                hwarp->CSR_reg[csr_addr] = csrtmp1.ins.s1;
 #ifdef SPIKE_OUTPUT
-                std::cout << "SM" << sm_id << " warp " << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr]
+                std::cout << "SM" << sm_id << " warp " << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << hwarp->CSR_reg[csr_addr]
                           << " by ins pc=0x" << csrtmp1.ins.currentpc << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 #endif
                 break;
             case CSRRSI_:
-                t = m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr];
+                t = hwarp->CSR_reg[csr_addr];
                 csrtmp2.data = t;
-                m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr] = csrtmp1.ins.s1;
+                hwarp->CSR_reg[csr_addr] = csrtmp1.ins.s1;
 #ifdef SPIKE_OUTPUT
-                std::cout << "SM" << sm_id << " warp " << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr]
+                std::cout << "SM" << sm_id << " warp " << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << hwarp->CSR_reg[csr_addr]
                           << " by ins pc=0x" << csrtmp1.ins.currentpc << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 #endif
                 break;
             case CSRRCI_:
-                t = m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr];
+                t = hwarp->CSR_reg[csr_addr];
                 csrtmp2.data = t;
-                m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr] = t & ~csrtmp1.ins.s1;
+                hwarp->CSR_reg[csr_addr] = t & ~csrtmp1.ins.s1;
 #ifdef SPIKE_OUTPUT
-                std::cout << "SM" << sm_id << " warp " << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << m_hw_warps[csrtmp1.warp_id]->CSR_reg[csr_addr]
+                std::cout << "SM" << sm_id << " warp " << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << hwarp->CSR_reg[csr_addr]
                           << " by ins pc=0x" << csrtmp1.ins.currentpc << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 #endif
                 break;
             case VSETVLI_:
-                csrtmp2.data = m_hw_warps[csrtmp1.warp_id]->num_thread;
+                csrtmp2.data = hwarp->num_thread;
                 break;
             case SETRPC_:
-                m_hw_warps[csrtmp1.warp_id]->CSR_reg[0x80c] = csrtmp1.csrSdata1 + csrtmp1.csrSdata2;
+                hwarp->CSR_reg[0x80c] = csrtmp1.csrSdata1 + csrtmp1.csrSdata2;
                 csrtmp2.data = 0;
 #ifdef SPIKE_OUTPUT
                 std::cout << "SM" << sm_id << " warp " << csrtmp1.warp_id
                           << std::hex << " 0x" << csrtmp1.ins.currentpc << " " << csrtmp1.ins
-                          << std::hex << " CSR[0X80c]=0x" << m_hw_warps[csrtmp1.warp_id]->CSR_reg[0x80c] << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                          << std::hex << " CSR[0X80c]=0x" << hwarp->CSR_reg[0x80c] << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 #endif
                 break;
             default:
